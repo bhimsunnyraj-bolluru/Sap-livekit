@@ -11,6 +11,7 @@ export default function VoiceAssistant() {
 
   const wsRef = useRef<WebSocket | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const commitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const playPCM16Audio = async (base64Audio: string) => {
     try {
@@ -92,17 +93,6 @@ export default function VoiceAssistant() {
           'Speak to start SAP AI support conversation.',
         ])
 
-        ws.send(
-          JSON.stringify({
-            type: 'response.create',
-            response: {
-              modalities: ['text', 'audio'],
-              instructions:
-                'You are a SAP S/4HANA AI support assistant. Help users with SAP access, pricing, subscriptions, Fiori issues, and troubleshooting.',
-            },
-          })
-        )
-
         const audioContext = new AudioContext({ sampleRate: 24000 })
 
         const source = audioContext.createMediaStreamSource(stream)
@@ -130,6 +120,31 @@ export default function VoiceAssistant() {
                 ),
               })
             )
+
+            if (commitTimeoutRef.current) {
+              clearTimeout(commitTimeoutRef.current)
+            }
+
+            commitTimeoutRef.current = setTimeout(() => {
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(
+                  JSON.stringify({
+                    type: 'input_audio_buffer.commit',
+                  })
+                )
+
+                ws.send(
+                  JSON.stringify({
+                    type: 'response.create',
+                    response: {
+                      modalities: ['text', 'audio'],
+                      instructions:
+                        'You are a SAP S/4HANA AI support assistant. Help users with SAP access, pricing, subscriptions, SAP Fiori issues, troubleshooting, and training support.',
+                    },
+                  })
+                )
+              }
+            }, 1500)
           }
         }
       }
