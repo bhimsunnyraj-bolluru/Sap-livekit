@@ -11,6 +11,10 @@ export default function VoiceAssistant() {
 
   const connectVoiceAssistant = async () => {
     try {
+      setStatus('Requesting microphone permission...')
+
+      await navigator.mediaDevices.getUserMedia({ audio: true })
+
       setStatus('Connecting to LiveKit...')
 
       const livekitRes = await fetch('/api/livekit-token')
@@ -20,7 +24,7 @@ export default function VoiceAssistant() {
 
       await room.connect(livekitData.url, livekitData.token)
 
-      await room.localParticipant.enableCameraAndMicrophone(false, true)
+      await room.localParticipant.setMicrophoneEnabled(true)
 
       setStatus('Connecting OpenAI Realtime...')
 
@@ -30,15 +34,18 @@ export default function VoiceAssistant() {
       console.log(openaiData)
 
       setConnected(true)
+
       setStatus('🎤 SAP Voice AI Active')
 
       setMessages([
-        'AI Assistant connected.',
-        'You can now speak about SAP support, pricing, and access.',
+        'Microphone connected successfully.',
+        'LiveKit realtime session active.',
+        'OpenAI realtime initialized.',
+        'You can now speak about SAP support issues.',
       ])
     } catch (error) {
       console.error(error)
-      setStatus('Connection failed')
+      setStatus('Microphone or LiveKit connection failed')
     }
   }
 
