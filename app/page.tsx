@@ -5,79 +5,91 @@ export default function Home() {
   const whatsappLink = 'https://wa.me/918332992627?text=Hi%20I%20am%20interested%20in%20SAP%20S%2F4HANA%20Live%20Access'
 
   return (
-    <main className="min-h-screen bg-black text-white p-10">
-      <section className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold mb-6 leading-tight">
-          🚀 Practice SAP S/4HANA in a Real-Time Environment
-        </h1>
+    <main className="mobile-container px-5 py-6">
+      <section>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <p className="text-zinc-400 text-sm">Welcome Back 👋</p>
+            <h1 className="text-3xl font-bold mt-1">
+              SAP S/4HANA 2025
+            </h1>
+          </div>
 
-        <p className="text-xl mb-10 text-zinc-300 max-w-3xl">
-          Learn SAP with live system access, business scenarios, AI guidance,
-          and real project-style practice.
-        </p>
+          <div className="w-14 h-14 rounded-2xl glass-card flex items-center justify-center text-2xl">
+            🚀
+          </div>
+        </div>
 
-        <div className="flex gap-4 mb-12 flex-wrap">
+        <div className="glass-card rounded-3xl p-6 mb-6">
+          <p className="text-zinc-300 mb-3">
+            Real-time SAP practice environment with AI support.
+          </p>
+
+          <h2 className="text-4xl font-bold leading-tight mb-5">
+            Practice Like a Real SAP Consultant
+          </h2>
+
           <a
             href={whatsappLink}
             target="_blank"
-            className="bg-white text-black px-6 py-3 rounded-xl font-bold"
+            className="block bg-white text-black text-center py-4 rounded-2xl font-bold"
           >
             Start SAP Practice
           </a>
-
-          <a
-            href={whatsappLink}
-            target="_blank"
-            className="border border-white px-6 py-3 rounded-xl font-bold"
-          >
-            Talk to AI Assistant
-          </a>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="border border-zinc-700 p-5 rounded-2xl bg-zinc-900">
-            <h2 className="text-2xl font-bold">1 Month</h2>
-            <p className="text-3xl mt-2">₹1,000</p>
-            <p className="text-zinc-400">$10</p>
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="glass-card rounded-3xl p-5">
+            <p className="text-zinc-400 text-sm">1 Month</p>
+            <h2 className="text-3xl font-bold mt-2">₹1,000</h2>
+            <p className="text-zinc-500">$10</p>
           </div>
 
-          <div className="border border-zinc-700 p-5 rounded-2xl bg-zinc-900">
-            <h2 className="text-2xl font-bold">3 Months</h2>
-            <p className="text-3xl mt-2">₹2,500</p>
-            <p className="text-zinc-400">$25</p>
+          <div className="glass-card rounded-3xl p-5">
+            <p className="text-zinc-400 text-sm">3 Months</p>
+            <h2 className="text-3xl font-bold mt-2">₹2,500</h2>
+            <p className="text-zinc-500">$25</p>
           </div>
 
-          <div className="border border-zinc-700 p-5 rounded-2xl bg-zinc-900">
-            <h2 className="text-2xl font-bold">6 Months</h2>
-            <p className="text-3xl mt-2">₹4,500</p>
-            <p className="text-zinc-400">$50</p>
+          <div className="glass-card rounded-3xl p-5">
+            <p className="text-zinc-400 text-sm">6 Months</p>
+            <h2 className="text-3xl font-bold mt-2">₹4,500</h2>
+            <p className="text-zinc-500">$50</p>
           </div>
 
-          <div className="border border-zinc-700 p-5 rounded-2xl bg-zinc-900">
-            <h2 className="text-2xl font-bold">1 Year</h2>
-            <p className="text-3xl mt-2">₹8,000</p>
-            <p className="text-zinc-400">$85</p>
+          <div className="glass-card rounded-3xl p-5">
+            <p className="text-zinc-400 text-sm">1 Year</p>
+            <h2 className="text-3xl font-bold mt-2">₹8,000</h2>
+            <p className="text-zinc-500">$85</p>
           </div>
         </div>
 
-        <div className="mt-16 grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <h2 className="text-4xl font-bold mb-6">
-              💡 What You Get
-            </h2>
+        <div className="glass-card rounded-3xl p-6 mb-8">
+          <h2 className="text-2xl font-bold mb-5">
+            💡 What You Get
+          </h2>
 
-            <ul className="space-y-4 text-lg text-zinc-300">
-              <li>✔ SAP Fiori Launchpad Access</li>
-              <li>✔ Real-time Business Scenarios</li>
-              <li>✔ Practice like real SAP projects</li>
-              <li>✔ AI-guided learning support</li>
-              <li>✔ Perfect for consultants & beginners</li>
-            </ul>
+          <div className="space-y-4 text-zinc-300">
+            <div>✔ SAP Fiori Launchpad Access</div>
+            <div>✔ Real-time Business Scenarios</div>
+            <div>✔ Practice like real SAP projects</div>
+            <div>✔ AI-guided learning support</div>
+            <div>✔ Consultant & beginner friendly</div>
           </div>
-
-          <LeadForm />
         </div>
+
+        <LeadForm />
       </section>
+
+      <div className="bottom-nav">
+        <a
+          href={whatsappLink}
+          target="_blank"
+          className="block bg-green-500 text-center text-white py-4 rounded-2xl font-bold"
+        >
+          💬 Chat on WhatsApp
+        </a>
+      </div>
 
       <VoiceAssistant />
     </main>
