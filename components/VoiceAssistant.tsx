@@ -10,6 +10,43 @@ export default function VoiceAssistant() {
   const [messages, setMessages] = useState<string[]>([])
 
   const wsRef = useRef<WebSocket | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+
+  const playPCM16Audio = async (base64Audio: string) => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext({ sampleRate: 24000 })
+      }
+
+      const binary = atob(base64Audio)
+      const bytes = new Uint8Array(binary.length)
+
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i)
+      }
+
+      const pcmData = new Int16Array(bytes.buffer)
+
+      const audioBuffer = audioContextRef.current.createBuffer(
+        1,
+        pcmData.length,
+        24000
+      )
+
+      const channelData = audioBuffer.getChannelData(0)
+
+      for (let i = 0; i < pcmData.length; i++) {
+        channelData[i] = pcmData[i] / 0x7fff
+      }
+
+      const source = audioContextRef.current.createBufferSource()
+      source.buffer = audioBuffer
+      source.connect(audioContextRef.current.destination)
+      source.start()
+    } catch (err) {
+      console.error('Audio playback failed', err)
+    }
+  }
 
   const connectVoiceAssistant = async () => {
     try {
@@ -55,7 +92,18 @@ export default function VoiceAssistant() {
           'Speak to start SAP AI support conversation.',
         ])
 
-        const audioContext = new AudioContext()
+        ws.send(
+          JSON.stringify({
+            type: 'response.create',
+            response: {
+              modalities: ['text', 'audio'],
+              instructions:
+                'You are a SAP S/4HANA AI support assistant. Help users with SAP access, pricing, subscriptions, Fiori issues, and troubleshooting.',
+            },
+          })
+        )
+
+        const audioContext = new AudioContext({ sampleRate: 24000 })
 
         const source = audioContext.createMediaStreamSource(stream)
 
@@ -96,7 +144,7 @@ export default function VoiceAssistant() {
         }
 
         if (data.type === 'response.audio.delta') {
-          console.log('Audio response received')
+          await playPCM16Audio(data.delta)
         }
       }
 
