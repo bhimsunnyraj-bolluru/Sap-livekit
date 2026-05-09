@@ -11,7 +11,8 @@
     "next": "14.2.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "livekit-client": "^2.5.7"
+    "livekit-client": "^2.5.7",
+    "livekit-server-sdk": "^2.8.1"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
