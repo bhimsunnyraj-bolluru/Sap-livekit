@@ -5,19 +5,11 @@ import { useState } from 'react'
 export default function LeadForm() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [message, setMessage] = useState('')
 
-  const submitLead = async () => {
-    const res = await fetch('/api/lead', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, phone }),
-    })
+  const submitLead = () => {
+    const message = `Hi, I want SAP S/4HANA access.%0A%0AName: ${encodeURIComponent(name)}%0AWhatsApp: ${encodeURIComponent(phone)}`
 
-    const data = await res.json()
-    setMessage(data.message)
+    window.open(`https://wa.me/918332992627?text=${message}`, '_blank')
   }
 
   return (
@@ -42,10 +34,8 @@ export default function LeadForm() {
         onClick={submitLead}
         className="bg-white text-black px-5 py-3 rounded-xl font-bold w-full"
       >
-        Submit
+        Continue on WhatsApp
       </button>
-
-      {message && <p className="mt-4 text-green-400">{message}</p>}
     </div>
   )
 }
