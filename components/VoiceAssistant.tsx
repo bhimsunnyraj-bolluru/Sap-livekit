@@ -1,10 +1,33 @@
 'use client'
 
 import { useState } from 'react'
+import { Room } from 'livekit-client'
 
 export default function VoiceAssistant() {
   const [open, setOpen] = useState(false)
   const [connected, setConnected] = useState(false)
+  const [status, setStatus] = useState('Disconnected')
+
+  const connectVoiceAssistant = async () => {
+    try {
+      setStatus('Connecting...')
+
+      const res = await fetch('/api/livekit-token')
+      const data = await res.json()
+
+      const room = new Room()
+
+      await room.connect(data.url, data.token)
+
+      await room.localParticipant.enableCameraAndMicrophone(false, true)
+
+      setConnected(true)
+      setStatus('🎤 Voice AI Connected')
+    } catch (error) {
+      console.error(error)
+      setStatus('Connection failed')
+    }
+  }
 
   if (!open) {
     return (
@@ -34,11 +57,15 @@ export default function VoiceAssistant() {
         Ask about pricing, SAP access, and subscriptions.
       </p>
 
+      <div className="text-xs bg-zinc-100 rounded-xl px-3 py-2 mb-3 text-zinc-700">
+        {status}
+      </div>
+
       <button
-        onClick={() => setConnected(!connected)}
+        onClick={connectVoiceAssistant}
         className="bg-black text-white px-4 py-3 rounded-2xl w-full font-bold"
       >
-        {connected ? 'Disconnect Voice AI' : 'Start Voice Assistant'}
+        {connected ? 'Voice AI Active' : 'Start Voice Assistant'}
       </button>
     </div>
   )
