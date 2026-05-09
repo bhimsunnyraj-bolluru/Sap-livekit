@@ -66,15 +66,24 @@ export default function VoiceAssistant() {
 
       await room.localParticipant.setMicrophoneEnabled(true)
 
-      setStatus('Connecting OpenAI Realtime...')
+      setStatus('Creating OpenAI realtime session...')
 
-      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      const sessionRes = await fetch('/api/openai-session')
+      const sessionData = await sessionRes.json()
+
+      const ephemeralKey = sessionData.client_secret?.value
+
+      if (!ephemeralKey) {
+        throw new Error('Failed to create OpenAI realtime session')
+      }
+
+      setStatus('Connecting OpenAI Realtime...')
 
       const ws = new WebSocket(
         'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
         [
           'realtime',
-          `openai-insecure-api-key.${apiKey}`,
+          `openai-insecure-api-key.${ephemeralKey}`,
           'openai-beta.realtime-v1',
         ]
       )
@@ -138,8 +147,6 @@ export default function VoiceAssistant() {
                     type: 'response.create',
                     response: {
                       modalities: ['text', 'audio'],
-                      instructions:
-                        'You are a SAP S/4HANA AI support assistant. Help users with SAP access, pricing, subscriptions, SAP Fiori issues, troubleshooting, and training support.',
                     },
                   })
                 )
