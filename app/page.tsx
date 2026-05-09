@@ -1,3 +1,5 @@
+import VoiceAssistant from '../components/VoiceAssistant'
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white p-10">
@@ -37,11 +39,9 @@ export default function Home() {
         <p>
           Ask about pricing, subscriptions, and SAP access.
         </p>
-
-        <button className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-bold">
-          Start Voice Assistant
-        </button>
       </div>
+
+      <VoiceAssistant />
     </main>
   )
 }
