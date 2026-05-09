@@ -2,7 +2,34 @@ import VoiceAssistant from '../components/VoiceAssistant'
 import LeadForm from '../components/LeadForm'
 
 export default function Home() {
-  const whatsappLink = 'https://wa.me/918332992627?text=Hi%20I%20am%20interested%20in%20SAP%20S%2F4HANA%20Live%20Access'
+  const whatsappBase = 'https://wa.me/918332992627?text='
+
+  const plans = [
+    {
+      duration: '1 Month',
+      price: '₹1,000',
+      usd: '$10',
+      message: 'Hi, I am interested in the 1 Month SAP S/4HANA plan for ₹1,000 / $10',
+    },
+    {
+      duration: '3 Months',
+      price: '₹2,500',
+      usd: '$25',
+      message: 'Hi, I am interested in the 3 Months SAP S/4HANA plan for ₹2,500 / $25',
+    },
+    {
+      duration: '6 Months',
+      price: '₹4,500',
+      usd: '$50',
+      message: 'Hi, I am interested in the 6 Months SAP S/4HANA plan for ₹4,500 / $50',
+    },
+    {
+      duration: '1 Year',
+      price: '₹8,000',
+      usd: '$85',
+      message: 'Hi, I am interested in the 1 Year SAP S/4HANA plan for ₹8,000 / $85',
+    },
+  ]
 
   return (
     <main className="mobile-container px-5 py-6">
@@ -30,7 +57,7 @@ export default function Home() {
           </h2>
 
           <a
-            href={whatsappLink}
+            href={`${whatsappBase}${encodeURIComponent('Hi I am interested in SAP S/4HANA Live Access')}`}
             target="_blank"
             className="block bg-white text-black text-center py-4 rounded-2xl font-bold"
           >
@@ -39,29 +66,22 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="glass-card rounded-3xl p-5">
-            <p className="text-zinc-400 text-sm">1 Month</p>
-            <h2 className="text-3xl font-bold mt-2">₹1,000</h2>
-            <p className="text-zinc-500">$10</p>
-          </div>
+          {plans.map((plan) => (
+            <a
+              key={plan.duration}
+              href={`${whatsappBase}${encodeURIComponent(plan.message)}`}
+              target="_blank"
+              className="glass-card rounded-3xl p-5 block active:scale-95 transition"
+            >
+              <p className="text-zinc-400 text-sm">{plan.duration}</p>
+              <h2 className="text-3xl font-bold mt-2">{plan.price}</h2>
+              <p className="text-zinc-500 mb-4">{plan.usd}</p>
 
-          <div className="glass-card rounded-3xl p-5">
-            <p className="text-zinc-400 text-sm">3 Months</p>
-            <h2 className="text-3xl font-bold mt-2">₹2,500</h2>
-            <p className="text-zinc-500">$25</p>
-          </div>
-
-          <div className="glass-card rounded-3xl p-5">
-            <p className="text-zinc-400 text-sm">6 Months</p>
-            <h2 className="text-3xl font-bold mt-2">₹4,500</h2>
-            <p className="text-zinc-500">$50</p>
-          </div>
-
-          <div className="glass-card rounded-3xl p-5">
-            <p className="text-zinc-400 text-sm">1 Year</p>
-            <h2 className="text-3xl font-bold mt-2">₹8,000</h2>
-            <p className="text-zinc-500">$85</p>
-          </div>
+              <div className="bg-green-500 text-white text-center py-2 rounded-xl text-sm font-bold">
+                Select Plan
+              </div>
+            </a>
+          ))}
         </div>
 
         <div className="glass-card rounded-3xl p-6 mb-8">
@@ -83,7 +103,7 @@ export default function Home() {
 
       <div className="bottom-nav">
         <a
-          href={whatsappLink}
+          href={`${whatsappBase}${encodeURIComponent('Hi I am interested in SAP S/4HANA Live Access')}`}
           target="_blank"
           className="block bg-green-500 text-center text-white py-4 rounded-2xl font-bold"
         >
