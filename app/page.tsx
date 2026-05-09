@@ -1,5 +1,6 @@
 import VoiceAssistant from '../components/VoiceAssistant'
 import LeadForm from '../components/LeadForm'
+import SupportCard from '../components/SupportCard'
 
 export default function Home() {
   const whatsappBase = 'https://wa.me/918332992627?text='
@@ -97,6 +98,8 @@ export default function Home() {
             <div>✔ Consultant & beginner friendly</div>
           </div>
         </div>
+
+        <SupportCard />
 
         <LeadForm />
       </section>
