@@ -2,6 +2,8 @@ import VoiceAssistant from '../components/VoiceAssistant'
 import LeadForm from '../components/LeadForm'
 
 export default function Home() {
+  const whatsappLink = 'https://wa.me/918332992627?text=Hi%20I%20am%20interested%20in%20SAP%20S%2F4HANA%20Live%20Access'
+
   return (
     <main className="min-h-screen bg-black text-white p-10">
       <section className="max-w-6xl mx-auto">
@@ -15,13 +17,21 @@ export default function Home() {
         </p>
 
         <div className="flex gap-4 mb-12 flex-wrap">
-          <button className="bg-white text-black px-6 py-3 rounded-xl font-bold">
+          <a
+            href={whatsappLink}
+            target="_blank"
+            className="bg-white text-black px-6 py-3 rounded-xl font-bold"
+          >
             Start SAP Practice
-          </button>
+          </a>
 
-          <button className="border border-white px-6 py-3 rounded-xl font-bold">
+          <a
+            href={whatsappLink}
+            target="_blank"
+            className="border border-white px-6 py-3 rounded-xl font-bold"
+          >
             Talk to AI Assistant
-          </button>
+          </a>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
