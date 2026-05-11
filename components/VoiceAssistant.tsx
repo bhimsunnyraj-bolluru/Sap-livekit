@@ -1,70 +1,82 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Room,
-  RoomEvent,
-  RemoteTrack,
-  Track,
-} from 'livekit-client'
 
 export default function VoiceAssistant() {
   const [open, setOpen] = useState(false)
-  const [connected, setConnected] = useState(false)
-  const [status, setStatus] = useState('Disconnected')
+  const [listening, setListening] = useState(false)
   const [messages, setMessages] = useState<string[]>([])
+  const [status, setStatus] = useState('Ready')
 
-  const connectVoiceAssistant = async () => {
+  const startVoiceAssistant = async () => {
     try {
-      setStatus('Requesting microphone permission...')
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition
 
-      await navigator.mediaDevices.getUserMedia({ audio: true })
+      if (!SpeechRecognition) {
+        alert('Speech recognition not supported in this browser')
+        return
+      }
 
-      setStatus('Connecting to LiveKit room...')
+      const recognition = new SpeechRecognition()
 
-      const livekitRes = await fetch('/api/livekit-token')
-      const livekitData = await livekitRes.json()
+      recognition.lang = 'en-US'
+      recognition.continuous = false
+      recognition.interimResults = false
 
-      const room = new Room()
+      recognition.onstart = () => {
+        setListening(true)
+        setStatus('🎤 Listening...')
+      }
 
-      room.on(
-        RoomEvent.TrackSubscribed,
-        (track: RemoteTrack, publication, participant) => {
-          console.log('Subscribed to track from:', participant.identity)
+      recognition.onresult = async (event: any) => {
+        const transcript = event.results[0][0].transcript
 
-          if (track.kind === Track.Kind.Audio) {
-            const audioElement = track.attach()
+        setMessages((prev) => [...prev, `🧑 You: ${transcript}`])
 
-            audioElement.autoplay = true
-            audioElement.controls = false
+        setStatus('🤖 Thinking...')
 
-            document.body.appendChild(audioElement)
+        const res = await fetch('/api/ai-chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: transcript,
+          }),
+        })
 
-            setMessages((prev) => [
-              ...prev,
-              `🔊 AI voice connected from ${participant.identity}`,
-            ])
-          }
+        const data = await res.json()
+
+        const reply = data.reply || 'Sorry, I could not respond.'
+
+        setMessages((prev) => [...prev, `🤖 SAP AI: ${reply}`])
+
+        setStatus('🔊 Speaking...')
+
+        const utterance = new SpeechSynthesisUtterance(reply)
+
+        utterance.rate = 1
+        utterance.pitch = 1
+
+        speechSynthesis.speak(utterance)
+
+        utterance.onend = () => {
+          setStatus('Ready')
+          setListening(false)
         }
-      )
+      }
 
-      await room.connect(livekitData.url, livekitData.token)
+      recognition.onerror = () => {
+        setListening(false)
+        setStatus('Speech recognition failed')
+      }
 
-      await room.localParticipant.setMicrophoneEnabled(true)
-
-      setConnected(true)
-
-      setStatus('🎤 SAP Voice AI Active')
-
-      setMessages([
-        'Microphone connected successfully.',
-        'LiveKit realtime room active.',
-        'Waiting for SAP AI agent voice...',
-        'Speak naturally to begin conversation.',
-      ])
-    } catch (error) {
-      console.error(error)
-      setStatus('LiveKit voice connection failed')
+      recognition.start()
+    } catch (err) {
+      console.error(err)
+      setStatus('Voice assistant failed')
     }
   }
 
@@ -93,28 +105,33 @@ export default function VoiceAssistant() {
       </div>
 
       <p className="text-sm mb-3 text-zinc-700">
-        Realtime SAP support assistant powered by LiveKit + OpenAI.
+        SAP voice support assistant powered by OpenAI.
       </p>
 
       <div className="text-xs bg-zinc-100 rounded-xl px-3 py-2 mb-3 text-zinc-700">
         {status}
       </div>
 
-      {messages.length > 0 && (
-        <div className="bg-zinc-100 rounded-2xl p-3 mb-3 max-h-40 overflow-auto text-sm space-y-2">
-          {messages.map((msg, index) => (
-            <div key={index} className="text-zinc-700">
-              • {msg}
+      <div className="bg-zinc-100 rounded-2xl p-3 mb-3 max-h-56 overflow-auto text-sm space-y-2">
+        {messages.length === 0 ? (
+          <div className="text-zinc-500">
+            Ask about SAP subscriptions, pricing, access, or SAP support.
+          </div>
+        ) : (
+          messages.map((msg, index) => (
+            <div key={index} className="text-zinc-700 whitespace-pre-wrap">
+              {msg}
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
 
       <button
-        onClick={connectVoiceAssistant}
+        onClick={startVoiceAssistant}
+        disabled={listening}
         className="bg-black text-white px-4 py-3 rounded-2xl w-full font-bold"
       >
-        {connected ? '🎤 Voice AI Active' : 'Start Voice Assistant'}
+        {listening ? '🎤 Listening...' : 'Start Voice Assistant'}
       </button>
     </div>
   )
