@@ -1,7 +1,12 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Room } from 'livekit-client'
+import { useState } from 'react'
+import {
+  Room,
+  RoomEvent,
+  RemoteTrack,
+  Track,
+} from 'livekit-client'
 
 export default function VoiceAssistant() {
   const [open, setOpen] = useState(false)
@@ -9,174 +14,57 @@ export default function VoiceAssistant() {
   const [status, setStatus] = useState('Disconnected')
   const [messages, setMessages] = useState<string[]>([])
 
-  const wsRef = useRef<WebSocket | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const commitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const playPCM16Audio = async (base64Audio: string) => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext({ sampleRate: 24000 })
-      }
-
-      const binary = atob(base64Audio)
-      const bytes = new Uint8Array(binary.length)
-
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i)
-      }
-
-      const pcmData = new Int16Array(bytes.buffer)
-
-      const audioBuffer = audioContextRef.current.createBuffer(
-        1,
-        pcmData.length,
-        24000
-      )
-
-      const channelData = audioBuffer.getChannelData(0)
-
-      for (let i = 0; i < pcmData.length; i++) {
-        channelData[i] = pcmData[i] / 0x7fff
-      }
-
-      const source = audioContextRef.current.createBufferSource()
-      source.buffer = audioBuffer
-      source.connect(audioContextRef.current.destination)
-      source.start()
-    } catch (err) {
-      console.error('Audio playback failed', err)
-    }
-  }
-
   const connectVoiceAssistant = async () => {
     try {
       setStatus('Requesting microphone permission...')
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      await navigator.mediaDevices.getUserMedia({ audio: true })
 
-      setStatus('Connecting to LiveKit...')
+      setStatus('Connecting to LiveKit room...')
 
       const livekitRes = await fetch('/api/livekit-token')
       const livekitData = await livekitRes.json()
 
       const room = new Room()
 
+      room.on(
+        RoomEvent.TrackSubscribed,
+        (track: RemoteTrack, publication, participant) => {
+          console.log('Subscribed to track from:', participant.identity)
+
+          if (track.kind === Track.Kind.Audio) {
+            const audioElement = track.attach()
+
+            audioElement.autoplay = true
+            audioElement.controls = false
+
+            document.body.appendChild(audioElement)
+
+            setMessages((prev) => [
+              ...prev,
+              `🔊 AI voice connected from ${participant.identity}`,
+            ])
+          }
+        }
+      )
+
       await room.connect(livekitData.url, livekitData.token)
 
       await room.localParticipant.setMicrophoneEnabled(true)
 
-      setStatus('Creating OpenAI realtime session...')
+      setConnected(true)
 
-      const sessionRes = await fetch('/api/openai-session')
-      const sessionData = await sessionRes.json()
+      setStatus('🎤 SAP Voice AI Active')
 
-      const ephemeralKey = sessionData.client_secret?.value
-
-      if (!ephemeralKey) {
-        throw new Error('Failed to create OpenAI realtime session')
-      }
-
-      setStatus('Connecting OpenAI Realtime...')
-
-      const ws = new WebSocket(
-        'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
-        [
-          'realtime',
-          `openai-insecure-api-key.${ephemeralKey}`,
-          'openai-beta.realtime-v1',
-        ]
-      )
-
-      wsRef.current = ws
-
-      ws.onopen = () => {
-        setConnected(true)
-
-        setStatus('🎤 SAP Voice AI Active')
-
-        setMessages([
-          'Microphone connected successfully.',
-          'LiveKit realtime session active.',
-          'OpenAI realtime websocket connected.',
-          'Speak to start SAP AI support conversation.',
-        ])
-
-        const audioContext = new AudioContext({ sampleRate: 24000 })
-
-        const source = audioContext.createMediaStreamSource(stream)
-
-        const processor = audioContext.createScriptProcessor(4096, 1, 1)
-
-        source.connect(processor)
-        processor.connect(audioContext.destination)
-
-        processor.onaudioprocess = (event) => {
-          const inputData = event.inputBuffer.getChannelData(0)
-
-          const pcm16 = new Int16Array(inputData.length)
-
-          for (let i = 0; i < inputData.length; i++) {
-            pcm16[i] = inputData[i] * 0x7fff
-          }
-
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(
-              JSON.stringify({
-                type: 'input_audio_buffer.append',
-                audio: btoa(
-                  String.fromCharCode(...new Uint8Array(pcm16.buffer))
-                ),
-              })
-            )
-
-            if (commitTimeoutRef.current) {
-              clearTimeout(commitTimeoutRef.current)
-            }
-
-            commitTimeoutRef.current = setTimeout(() => {
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(
-                  JSON.stringify({
-                    type: 'input_audio_buffer.commit',
-                  })
-                )
-
-                ws.send(
-                  JSON.stringify({
-                    type: 'response.create',
-                    response: {
-                      modalities: ['text', 'audio'],
-                    },
-                  })
-                )
-              }
-            }, 1500)
-          }
-        }
-      }
-
-      ws.onmessage = async (event) => {
-        const data = JSON.parse(event.data)
-
-        console.log('OpenAI event:', data)
-
-        if (data.type === 'response.text.delta') {
-          setMessages((prev) => [...prev, data.delta])
-        }
-
-        if (data.type === 'response.audio.delta') {
-          await playPCM16Audio(data.delta)
-        }
-      }
-
-      ws.onerror = (err) => {
-        console.error(err)
-        setStatus('OpenAI realtime websocket failed')
-      }
+      setMessages([
+        'Microphone connected successfully.',
+        'LiveKit realtime room active.',
+        'Waiting for SAP AI agent voice...',
+        'Speak naturally to begin conversation.',
+      ])
     } catch (error) {
       console.error(error)
-      setStatus('Microphone or LiveKit connection failed')
+      setStatus('LiveKit voice connection failed')
     }
   }
 
