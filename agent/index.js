@@ -23,7 +23,7 @@ export default defineAgent({
       console.log('🏠 Room name:', ctx.room.name)
 
       const model = new openai.realtime.RealtimeModel({
-        model: 'gpt-4o-realtime-preview',
+        model: 'gpt-realtime',
         instructions: `
           You are a SAP S/4HANA AI support assistant.
           Help users with SAP pricing, subscriptions, SAP Fiori, troubleshooting, and beginner support.
