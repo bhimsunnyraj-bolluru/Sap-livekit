@@ -5,34 +5,55 @@ import { fileURLToPath } from 'url'
 import { WorkerOptions, cli, defineAgent } from '@livekit/agents'
 import * as openai from '@livekit/agents-plugin-openai'
 
+console.log('🚀 SAP AI Agent booting...')
+console.log('LIVEKIT_URL:', process.env.LIVEKIT_URL ? 'SET' : 'MISSING')
+console.log('LIVEKIT_API_KEY:', process.env.LIVEKIT_API_KEY ? 'SET' : 'MISSING')
+console.log('LIVEKIT_API_SECRET:', process.env.LIVEKIT_API_SECRET ? 'SET' : 'MISSING')
+console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : 'MISSING')
+
 export default defineAgent({
   entry: async (ctx) => {
-    console.log('SAP AI Agent starting...')
+    try {
+      console.log('🎤 Agent entry started')
+      console.log('🔌 Connecting to LiveKit room...')
 
-    await ctx.connect()
+      await ctx.connect()
 
-    const agent = new openai.realtime.RealtimeModel({
-      instructions: `
-        You are a SAP S/4HANA AI support assistant.
+      console.log('✅ Connected to LiveKit room')
+      console.log('🏠 Room name:', ctx.room.name)
 
-        Help users with:
-        - SAP pricing plans
-        - SAP Fiori access
-        - subscription support
-        - SAP troubleshooting
-        - beginner guidance
-        - SAP project learning
+      const agent = new openai.realtime.RealtimeModel({
+        instructions: `
+          You are a SAP S/4HANA AI support assistant.
 
-        Speak clearly and professionally.
-      `,
-      voice: 'alloy',
-    })
+          Help users with:
+          - SAP pricing plans
+          - SAP Fiori access
+          - subscription support
+          - SAP troubleshooting
+          - beginner guidance
+          - SAP project learning
 
-    agent.start(ctx.room)
+          Speak clearly and professionally.
+        `,
+        voice: 'alloy',
+      })
 
-    console.log('SAP AI Agent connected successfully')
+      console.log('🤖 OpenAI realtime model created')
+      console.log('🎧 Starting AI agent audio pipeline...')
+
+      agent.start(ctx.room)
+
+      console.log('✅ SAP AI Agent connected successfully')
+      console.log('🔊 Agent should now publish audio tracks')
+    } catch (err) {
+      console.error('❌ AGENT FAILURE')
+      console.error(err)
+    }
   },
 })
+
+console.log('🏃 Starting LiveKit worker runtime...')
 
 cli.runApp(
   new WorkerOptions({
