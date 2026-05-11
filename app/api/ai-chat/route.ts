@@ -11,12 +11,18 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
             content: `
               You are a SAP S/4HANA AI support assistant.
+
+              Pricing plans:
+              - 1 month = $10
+              - 3 months = $25
+              - 6 months = $50
+              - 1 year = $85
 
               Help users with:
               - SAP pricing plans
@@ -34,22 +40,31 @@ export async function POST(req: Request) {
             content: body.message,
           },
         ],
+        max_tokens: 150,
       }),
     })
 
     const data = await response.json()
 
+    console.log('OpenAI response:', JSON.stringify(data))
+
+    if (!response.ok) {
+      return NextResponse.json({
+        reply: 'AI service temporarily unavailable.',
+        error: data,
+      })
+    }
+
+    const reply = data?.choices?.[0]?.message?.content
+
     return NextResponse.json({
-      reply: data.choices?.[0]?.message?.content || 'No response',
+      reply: reply || 'We offer SAP access plans starting from 10 dollars per month.',
     })
   } catch (err) {
-    console.error(err)
+    console.error('AI CHAT ERROR:', err)
 
-    return NextResponse.json(
-      {
-        error: 'AI request failed',
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      reply: 'We offer SAP access plans starting from 10 dollars per month.',
+    })
   }
 }
