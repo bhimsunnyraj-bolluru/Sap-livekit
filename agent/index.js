@@ -1,5 +1,7 @@
 import 'dotenv/config'
 
+import { fileURLToPath } from 'url'
+
 import { WorkerOptions, cli, defineAgent } from '@livekit/agents'
 import * as openai from '@livekit/agents-plugin-openai'
 
