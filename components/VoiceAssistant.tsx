@@ -57,8 +57,24 @@ export default function VoiceAssistant() {
 
         const utterance = new SpeechSynthesisUtterance(reply)
 
+        const voices = speechSynthesis.getVoices()
+
+        const femaleVoice = voices.find(
+          (voice) =>
+            voice.name.toLowerCase().includes('female') ||
+            voice.name.includes('Samantha') ||
+            voice.name.includes('Google UK English Female') ||
+            voice.name.includes('Jenny') ||
+            voice.name.includes('Aria')
+        )
+
+        if (femaleVoice) {
+          utterance.voice = femaleVoice
+        }
+
         utterance.rate = 1
-        utterance.pitch = 1
+        utterance.pitch = 1.15
+        utterance.volume = 1
 
         speechSynthesis.speak(utterance)
 
