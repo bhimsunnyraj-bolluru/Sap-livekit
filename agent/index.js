@@ -22,28 +22,31 @@ export default defineAgent({
       console.log('✅ Connected to LiveKit room')
       console.log('🏠 Room name:', ctx.room.name)
 
-      console.log('🧪 ctx methods:', Object.keys(ctx))
-
       const model = new openai.realtime.RealtimeModel({
         instructions: `
           You are a SAP S/4HANA AI support assistant.
           Help users with SAP pricing, subscriptions, SAP Fiori, troubleshooting, and beginner support.
+          Reply naturally with voice.
         `,
         voice: 'alloy',
       })
 
       console.log('🤖 OpenAI realtime model created')
-      console.log('🧪 model methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(model)))
 
-      const session = model.session()
+      const session = model.session({
+        room: ctx.room,
+        fncCtx: {},
+      })
 
+      console.log('✅ OpenAI realtime session created')
       console.log('🧪 session methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(session)))
 
-      console.log('🎧 Attempting realtime session start...')
-
       if (typeof session.start === 'function') {
-        await session.start(ctx.room)
-        console.log('✅ session.start worked')
+        console.log('🎧 Starting realtime audio session...')
+
+        await session.start()
+
+        console.log('✅ Realtime session started')
       } else {
         console.log('❌ session.start missing')
       }
