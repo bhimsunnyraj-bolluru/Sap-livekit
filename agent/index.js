@@ -23,6 +23,7 @@ export default defineAgent({
       console.log('🏠 Room name:', ctx.room.name)
 
       const model = new openai.realtime.RealtimeModel({
+        model: 'gpt-4o-realtime-preview',
         instructions: `
           You are a SAP S/4HANA AI support assistant.
           Help users with SAP pricing, subscriptions, SAP Fiori, troubleshooting, and beginner support.
@@ -33,25 +34,16 @@ export default defineAgent({
 
       console.log('🤖 OpenAI realtime model created')
 
-      const session = model.session({
+      model.session({
         room: ctx.room,
         fncCtx: {},
       })
 
       console.log('✅ OpenAI realtime session created')
-      console.log('🧪 session methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(session)))
-
-      if (typeof session.start === 'function') {
-        console.log('🎧 Starting realtime audio session...')
-
-        await session.start()
-
-        console.log('✅ Realtime session started')
-      } else {
-        console.log('❌ session.start missing')
-      }
-
       console.log('🔊 Agent audio tracks should now publish')
+
+      // keep worker alive forever
+      await new Promise(() => {})
     } catch (err) {
       console.error('❌ AGENT FAILURE')
       console.error(err)
