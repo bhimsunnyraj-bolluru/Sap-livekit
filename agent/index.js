@@ -22,7 +22,7 @@ export default defineAgent({
       console.log('✅ Connected to LiveKit room')
       console.log('🏠 Room name:', ctx.room.name)
 
-      const agent = new openai.realtime.RealtimeModel({
+      const model = new openai.realtime.RealtimeModel({
         instructions: `
           You are a SAP S/4HANA AI support assistant.
 
@@ -40,12 +40,12 @@ export default defineAgent({
       })
 
       console.log('🤖 OpenAI realtime model created')
-      console.log('🎧 Starting AI agent audio pipeline...')
+      console.log('🎧 Starting AI agent session...')
 
-      agent.start(ctx.room)
+      await ctx.run(model)
 
       console.log('✅ SAP AI Agent connected successfully')
-      console.log('🔊 Agent should now publish audio tracks')
+      console.log('🔊 Agent audio tracks should now publish')
     } catch (err) {
       console.error('❌ AGENT FAILURE')
       console.error(err)
