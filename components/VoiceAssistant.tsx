@@ -8,6 +8,49 @@ export default function VoiceAssistant() {
   const [messages, setMessages] = useState<string[]>([])
   const [status, setStatus] = useState('Ready')
 
+  const getBestFemaleVoice = () => {
+    const voices = speechSynthesis.getVoices()
+
+    const preferredVoices = [
+      'Microsoft Aria Online (Natural)',
+      'Microsoft Jenny Online (Natural)',
+      'Google UK English Female',
+      'Samantha',
+      'Karen',
+      'Moira',
+      'Tessa',
+      'Veena',
+      'Fiona',
+      'Victoria',
+      'Zira',
+    ]
+
+    for (const preferred of preferredVoices) {
+      const match = voices.find((voice) =>
+        voice.name.toLowerCase().includes(preferred.toLowerCase())
+      )
+
+      if (match) {
+        console.log('Using female voice:', match.name)
+        return match
+      }
+    }
+
+    const fallbackFemale = voices.find(
+      (voice) =>
+        voice.name.toLowerCase().includes('female') ||
+        voice.name.toLowerCase().includes('woman')
+    )
+
+    if (fallbackFemale) {
+      console.log('Using fallback female voice:', fallbackFemale.name)
+      return fallbackFemale
+    }
+
+    console.log('No female voice found, using browser default')
+    return null
+  }
+
   const startVoiceAssistant = async () => {
     try {
       const SpeechRecognition =
@@ -18,6 +61,8 @@ export default function VoiceAssistant() {
         alert('Speech recognition not supported in this browser')
         return
       }
+
+      speechSynthesis.getVoices()
 
       const recognition = new SpeechRecognition()
 
@@ -55,25 +100,19 @@ export default function VoiceAssistant() {
 
         setStatus('🔊 Speaking...')
 
+        speechSynthesis.cancel()
+
         const utterance = new SpeechSynthesisUtterance(reply)
 
-        const voices = speechSynthesis.getVoices()
-
-        const femaleVoice = voices.find(
-          (voice) =>
-            voice.name.toLowerCase().includes('female') ||
-            voice.name.includes('Samantha') ||
-            voice.name.includes('Google UK English Female') ||
-            voice.name.includes('Jenny') ||
-            voice.name.includes('Aria')
-        )
+        const femaleVoice = getBestFemaleVoice()
 
         if (femaleVoice) {
           utterance.voice = femaleVoice
         }
 
-        utterance.rate = 1
-        utterance.pitch = 1.15
+        utterance.lang = 'en-US'
+        utterance.rate = 0.95
+        utterance.pitch = 1.35
         utterance.volume = 1
 
         speechSynthesis.speak(utterance)
